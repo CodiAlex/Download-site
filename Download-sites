@@ -1,0 +1,94 @@
+#!/bin/bash
+# Script criado pelo Espirito Santo e Alexandre juntos.
+
+[ ! -d Links-de-site ] && mkdir Links-de-site
+
+[ -e links-de-pesquisa* ] && mv *.html Links-de-site
+
+  if [ -e Links-de-site/*.html ] ; then
+ count=0
+
+   for dois_files in Links-de-site/*.html ; do
+ 
+ # Linha de código das pesquisas e divisão.
+     Name_dir=$(grep '<title>' $dois_files | awk -F'>' '{print $2}' | awk -F'<' '{print $1}' | awk '{print $1}') 
+
+ # Criar subdiretório onde vão ficar os html.
+     mkdir -p Links-de-site/$Name_dir 
+
+ # Mover os html para o subdiretório.
+     mv $dois_files Links-de-site/$Name_dir
+
+count=$(($count+1))
+
+[ $count == 2 ] && break 
+
+   done 
+
+  fi
+
+[ ! -e Links-de-site/links-de-pesquisa*  ] && file_html=links-de-pesquisa1.html 
+
+
+if [ -e Links-de-site/links-de-pesquisa*  ] ; then  
+
+name_file=$(find Links-de-site -name links-de-pesquisa* | awk -F"/" '{print $2}'| grep .html)  
+
+number_file=$(grep -o "[0-9]" <<< Links-de-site/$name_file)
+
+Somar=$(($number_file+1))
+
+file_html=links-de-pesquisa$Somar.html
+
+fi
+
+ case $1 in 
+	-u)
+read Pesquisa
+Subdir=$Pesquisa
+
+Pesquisa=$(tr -s " " + <<< $Pesquisa)
+
+
+lynx -accept_all_cookies -child_relaxed -cookie_save_file=file-temporary.txt -lss=file.lss "https://duckduckgo.com/?t=ftsa&q=$Pesquisa" -source . > $file_html
+
+Links_sites=$(grep link-text $file_html | awk -F'>' '{print $2}' | awk -F'<' '{print $1}') 
+
+[ ! -d Download-sites ] && mkdir Download-sites
+
+    for sites in $Links_sites ; do
+
+wget $Links_sites -P Download-sites/$Subdir
+
+done
+
+[ -e links-de-pesquisa* ] && mv *.html Links-de-site
+ ;; 
+  --help) 
+echo -u é uma pesquisa e -m mais de uma pesquisa de acordo com Pesq.txt
+ ;;
+  -m)
+echo Sequência do arquivo Pesq.txt 
+
+ for Pesquisa in $(cat Pesq.txt) ; do 
+Subdir=$Pesquisa
+
+Pesquisa=$(tr -s " " + <<< $Pesquisa)
+
+
+lynx -accept_all_cookies -child_relaxed -cookie_save_file=file-temporary.txt -lss=file.lss "https://duckduckgo.com/?t=ftsa&q=$Pesquisa" -source . > $file_html
+
+Links_sites=$(grep link-text $file_html | awk -F'>' '{print $2}' | awk -F'<' '{print $1}') 
+
+[ ! -d Download-sites ] && mkdir Download-sites
+
+    for sites in $Links_sites ; do
+
+wget $Links_sites -P Download-sites/$Subdir
+
+done
+
+[ -e links-de-pesquisa* ] && mv *.html Links-de-site
+done
+  ;;
+esac  

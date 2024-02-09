@@ -70,7 +70,7 @@ echo -u é uma pesquisa e -m mais de uma pesquisa de acordo com Pesq.txt
   -m)
 echo Sequência do arquivo Pesq.txt 
 
- for Pesquisa in $(cat Pesq.txt) ; do 
+ for Pesquisa in "$(cat Pesq.txt)" ; do 
 Subdir=$Pesquisa
 
 Pesquisa=$(tr -s " " + <<< $Pesquisa)

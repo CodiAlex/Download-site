@@ -1,5 +1,4 @@
 #!/bin/bash
-# Script criado pelo Espirito Santo e Alexandre juntos.
 
 [ ! -d Links-de-site ] && mkdir Links-de-site
 
@@ -70,11 +69,13 @@ echo -u é uma pesquisa e -m mais de uma pesquisa de acordo com Pesq.txt
   -m)
 echo Sequência do arquivo Pesq.txt 
 
- for Pesquisa in "$(cat Pesq.txt)" ; do 
+[ -e Pesq.txt ] || echo Arquivo Pesq.txt não existe.    
+
+# Loop while converte linha no valor da variável Pesquisa.
+ while read Pesquisa ; do  
 Subdir=$Pesquisa
 
 Pesquisa=$(tr -s " " + <<< $Pesquisa)
-
 
 lynx -accept_all_cookies -child_relaxed -cookie_save_file=file-temporary.txt -lss=file.lss "https://duckduckgo.com/?t=ftsa&q=$Pesquisa" -source . > $file_html
 
@@ -83,12 +84,10 @@ Links_sites=$(grep link-text $file_html | awk -F'>' '{print $2}' | awk -F'<' '{p
 [ ! -d Download-sites ] && mkdir Download-sites
 
     for sites in $Links_sites ; do
-
 wget $Links_sites -P Download-sites/$Subdir
-
-done
+    done 
 
 [ -e links-de-pesquisa* ] && mv *.html Links-de-site
-done
+ done < Pesq.txt
   ;;
 esac  
